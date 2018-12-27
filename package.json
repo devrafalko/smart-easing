@@ -1,0 +1,62 @@
+{
+  "name": "smart-easing",
+  "version": "1.0.0",
+  "description": "The smart-easing is a library with a set of easing modes that lets to move the DOM or Canvas elements shoothly.",
+  "main": "dist/smart-easing.node.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "start": "webpack --config webpack.dev.js",
+    "build": "webpack --config webpack.prod.js",
+    "test": "babel-node jasmine.conf.js",
+    "test-web": "cross-env karma_spec_mode=noFailures karma start",
+    "test-err": "cross-env karma_spec_mode=full karma start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/devrafalko/smart-easing.git"
+  },
+  "keywords": [
+    "easing",
+    "smooth",
+    "ease-in",
+    "ease-out",
+    "animation",
+    "transition",
+    "canvas",
+    "dom",
+    "move",
+    "bezier",
+    "motion"
+  ],
+  "author": "Paweł Rafałko <dev.rafalko@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/devrafalko/smart-easing/issues"
+  },
+  "homepage": "https://github.com/devrafalko/smart-easing#readme",
+  "dependencies": {
+    "of-type": "^2.2.0",
+    "move-on": "^2.1.6"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.1.0",
+    "@babel/core": "^7.0.1",
+    "@babel/node": "^7.0.0",
+    "@babel/preset-env": "^7.0.0",
+    "babel-loader": "^8.0.2",
+    "babel-plugin-add-module-exports": "^1.0.0",
+    "cross-env": "^5.2.0",
+    "jasmine": "^3.3.1",
+    "jasmine-spec-reporter": "^4.2.1",
+    "join-array": "^1.1.1",
+    "styles-loader": "^1.0.0",
+    "uglifyjs-webpack-plugin": "^1.3.0",
+    "webpack": "^4.19.1",
+    "webpack-cli": "^3.1.1",
+    "webpack-karma-jasmine": "^3.0.4",
+    "webpack-merge": "^4.1.4",
+    "webpack-node-externals": "^1.7.2"
+  }
+}

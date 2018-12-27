@@ -1,0 +1,6 @@
+.history
+.vscode
+node_modules
+debug-init.js
+testing.js
+todo.txt
