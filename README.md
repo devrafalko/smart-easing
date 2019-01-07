@@ -1,32 +1,67 @@
 ### In This Documentation
 1. [Description](#description)
 2. [Implementation](#implementation)
-3. [Create new animation](#create-new-animation)  
-4. [Motion properties](#motion-properties)  
-5. [Create the chain of motion templates](#create-the-chain-of-motion-templates)  
+3. [Tests](#tests)
+4. [Create new animation](#create-new-animation)  
+5. [Motion properties](#motion-properties)  
+6. [Create the chain of motion templates](#create-the-chain-of-motion-templates)  
   a. [Chaining methods](#chaining-methods)  
   b. [Motion indicators](#motion-indicators)  
   c. [Custom motion templates](#custom-motion-templates)  
   d. [Trimming the motion templates from the queue](#trimming-the-motion-templates-from-the-queue)  
   e. [Modifying the motion templates on the run](#modifying-the-motion-templates-on-the-run)
-6. [Control the motion flow](#control-the-motion-flow)  
+7. [Control the motion flow](#control-the-motion-flow)  
   a. [Control methods](#control-methods)  
-  b. [Control events](#control-events)  
+  b. [Control events](#control-events-1)  
   c. [Control getters](#control-getters)
-7. [[Motion] instance](#motion-instance)
-8. [Break the animation](#break-the-animation)
-9. [Samples](#samples)
+8. [[Motion] instance](#motion-instance)
+9. [Break the animation](#break-the-animation)
+10. [Samples](#samples)
 
 # Description
 
-The `smart-easing` library works like CSS `animation` and `transition`. It computes the easing flow of the **number** from its initial value to the final one in the specified time interval. You can use the `smart-easing` library:
+#### Tell me what is it for
+
+The `smart-easing` library works like CSS `animation` and `transition`, except it's controlled with JS. You can use the `smart-easing` library:
 * anywhere that CSS `animation` and `transition` is limited
 * to control the DOM elements flow via JavaScript
 * to animate the CSS gradients
 * to animate Canvas *(eg. the graphs)*
 * to display the counting out numbers smoothly
+* to move your autonomous car or steer your rocket with smooth moves
 
-The computed easing numerical value can be attached to some DOM or Canvas element to control its flow by rerendering it in the specified number of frames per second. The `smart-easing` provides a set of methods and events to control the animation. It allows to create the motion templates and combine them into the chains. It also provides the default set of 69 easing modes.
+#### Tell me how it work
+
+It re-renders the [Number] value. This value is accessible via [`render()`](#render) event, that is fired for each [frame](#fps) of animation. This value can be attached to some DOM or Canvas element, eg `menu.style.height = value + 'px';` to control its flow with the chosen easing [mode](#mode).
+
+First, you create the new [Animation] instance with the required `smart-easing` [constructor](#create-new-animation). It takes one [Object] argument with some properties to set the initial configuration of the animation. This animation is not run immediately.
+
+Before you run the animtion, create the motion templates. One motion template is a set of [motion properties](#motion-properties) that determine the behaviour of one motion *(movement)*. You can set the initial value ([`start`](#start-stop)), the final value ([`stop`](#start-stop)), the duration of this motion ([`time`](#time)), one of 69 easing [`mode`](#mode)s, the [`fps`](#fps) that lets to set how many frames should be rerendered per one second, the [`delay`](#delay) of the motion, the identifier ([`id`](#id)) that allows to distinguish the motion templates, and [many more](#motion-properties).
+
+If some of the motion properties are common for all *(or the majority of)* motions in the animation *(eg. `{fps: 60}`)*, you don't have to define all motion properties for each motion template separately. You can define the [`defaults`](#defaults) property in the constructor's passed [Object] argument, to set the default motion properties that will be used for all motion templates by default.
+
+The [[Motions]](#motions-1) `getter` is accessible in the [Animation] instance, that has some methods and getters to navigate through the motion templates collection. They can be found easily, removed, or the new ones can be added.
+
+These all motion templates can be then run multiple times in various configurations with the [chaining methods](#chaining-methods) that can be chained. The chaining methods take the argument(s) that [indicate](#motion-indicators) the chosen motion template(s) *(eg. by its `id`)*. The way you combine the chaining methods and indicate the motion templates determines the flow of whole animation.
+
+
+When any chaining method is called, the animation runs. It can be additionally controlled by the available [control methods](#control-methods): [`pause`](#pause), [`resume`](#resume) and [`reset`](#reset).
+
+The whole animation can be also controlled when it is pending with the [control events](#control-events-1). The accessible control events, like [`beforeAll`](#beforeall), [`beforeEach`](#beforeeach), [`afterDelay`](#afterdelay), [`onPause`](#onpause), etc. can be used to catch the desired moment of the animation, that makes it more controllable. The [`render`](#render) event is fired for every frame of animation. It returns the recomputed easing [Number] value, thus allows *(for example)* to refresh the position of some DOM or Canvas element.
+
+The [Animation] instance also gives the access to the [`[Time]`](#time-1), [`[State]`](#State) and [`[Queue]`](#queue) getters that help to control the animation when it is pending, giving the access to some useful data.
+
+
+
+
+
+
+
+
+
+
+
+#### Show me how it work
 
 Check out the **[easing simulator](https://devrafalko.github.io/smart-easing/simulator)** that shows how the `smart-easing` works on DOM and Canvas samples with the built-in easing modes.
 
@@ -61,28 +96,28 @@ The library is accessible as `SmartEasing` variable in the global *(window)* sco
 </head>
 ```
 
+# Tests
+```cmd
+> git clone https://github.com/devrafalko/smart-easing.git
+> cd smart-easing
+> npm install
+> npm test        //run tests in node
+> npm test deep   //run tests in node with errors shown
+> npm test-web    //run tests with karma + chrome
+> npm test-err    //run tests with karma + chrome with errors shown
+```
+
 # Create new animation
 
-The `smart-easing` is a **constructor**.  
-Use the `new` keyword to create the new animation.  
+The `smart-easing` is a **constructor**. Use the `new` keyword to create the new animation. The new [Animation] instance is returned with plenty of accessible methods, events and getters, that are described below. The **constructor** takes one [Object] `[0]` argument. It lets to set the initial configuration of the animation, eg. the [`motions`](#motions) and [`defaults`](#defaults) properties and to set some [`event handlers`](#).
 
 ```javascript
 const SmartEasing = require('smart-easing');
 const menu = document.getElementById('menu');
 
 const animation = new SmartEasing({
-  render: (value) => {
-    menu.style.height = `${value}px`;
-  },
-  defaults:{
-    mode: 'ease-in-out',
-    fps: 32,
-    start: 0,
-    time: 200,
-    delay: 50,
-    smooth: true
-  },
   motions:[
+    'move-forward',
     {
       id: 'open',
       stop: 500,
@@ -91,34 +126,42 @@ const animation = new SmartEasing({
       id: 'close',
       stop: 0
     }
-  ]
+  ],
+  defaults:{
+    mode: 'ease-in-out',
+    fps: 32,
+    start: 0,
+    time: 200,
+    delay: 50,
+    smooth: true
+  },
+  render: (value) => {
+    menu.style.height = `${value}px`;
+  }
 });
 ```
-
-The **constructor** takes one [Object] argument with the following properties:
-### `render`
-**Type:** [Function|null]  
-**Default:** `null`
-* It lets to attach the computed easing numerical value to some DOM or Canvas element
-* The [Function] `render` is called for every animation **frame** *(according to the [`fps`](#fps) setting)*, thus it rerenders the chosen element flow
-* The current [Number|Array] **coordinates** *(the value between [`start`]() and [`stop`]())* are passed as the `[0]` argument in the `render` function
-* The `this` keyword in the `render` function refers to the [Animation] instance with all [getters](#control-getters), [control methods](#control-methods), [chaining methods](#chaining-methods) and [events](#control-events) to control the animation flow
 
 ### `motions`
 **Type:** [Array]  
 **Default:** `[]`
-* It lets to create the [Array] collection of **motion templates**
-* One motion template is a set of [motion properties](#motion-properties) that determine how the **easing numerical value** should behave when it is rerendering. The motion template can be **reused** many times, so the [motion properties](#motion-properties) do not have to be defined each time for the same motion
+* It lets to create the [Array] collection of motion templates
+* **Mind**, that the motion templates can also be added with the [`motions.add`](#motions-1) method
+* One motion template is a set of [motion properties](#motion-properties) that determine how the **easing** [Number] **value** should behave when it is rerendering. The motion template can be **reused** many times, so the [motion properties](#motion-properties) do not have to be defined each time for the same motion
 * These motion templates can be then easily combined in the animation **chains** by their [identifiers](#id) in many different configurations, using the available [chaining methods](#chaining-methods)
-* The [Array] `motions` must contain [Object] items
-* Each [Object] item is a set of [motion properties](#animation-properties) of the new **motion template**
-* the new [[Motion] instance](#motion-instance) is created for each new **motion template**
+* The [[Motion] instances](#motion-instance) are created for all motion templates defined as the items in the [Array] `motions` in the constructor. They are stored in the [Animation] [`motions`](#motions-1) getter. 
+* The [Array] `motions` must contain [Object|String|Motion] items
+  * The `[Object]` item is a set of [motion properties](#motion-properties) of the new motion template. If a motion property is defined incorrectly, the [`defaults`](#defaults) value is used instead
+  * The `[String]` item indicates the [`id`](#id) motion property. The [`defaults`](#defaults) values are used for the rest of motion properties for this motion
+  * The `[Motion]` item is simply added to the [`motions`](#motions-1) collection. It can be a [Motion] object taken from other animation
+  * If the item of incorrect type has been passed, the motion is created anyway with the [`defaults`](#defaults) values and the default [`id`](#id)
 
 ### `defaults`
 **Type:** [Object]  
 **Default:** `{}`
-* It lets to set the default *(global)* [motion properties](#motion-properties) that will be used by all [motion templates](#motions) in case they don't define the ones
-* The [motion properties](#motion-properties) defined in the [motion templates](#motions) have **priority** over the ones defined in the [Object] `defaults` property
+* If some of the [motion properties](#motion-properties) are common for all *(or the majority of)* motion templates, you don't have to define all motion properties for each motion template separately. You can define the default motion properties in the `defaults` object, that will be used for all motion templates by default.
+* The motion properties defined in the `defaults` object will be used by all motion templates in case they don't define the ones themselves
+* The motion properties defined in the motion templates have **priority** over the ones defined in the `defaults` property
+* All `defaults` motion properties are also accessible via the [Animation] [`defaults`](#defaults-1) instance. Each motion property has its `getter` and `setter`.
 
 ```javascript
 const SmartEasing = require('smart-easing');
@@ -137,6 +180,31 @@ const animation = new SmartEasing({
   ]
 });
 ```
+
+### [Control events]
+**Type:** [Function|null]  
+**Default:** `null`
+* The [Function] event handlers can be also set for all accessible [control events](#control-events-1)
+* The [control events](#control-events-1) are also accessible as [Animation] [`getters` and `setters`](#control-events-1) and do not have to be defined in the constructor
+
+```javascript
+const SmartEasing = require('smart-easing');
+const animation = new SmartEasing({
+  motions:[/*...*/],
+  defaults:{/*...*/},
+  render: (value) => {
+    menu.style.height = `${value}px`;
+  }
+});
+
+animation.afterAll(function(){
+  animation.go('close');
+  animation.pause();
+});
+
+```
+
+
 
 # Motion properties
 * The **motion properties** allow to control how the specified motion should behave
@@ -162,30 +230,38 @@ const animation = new SmartEasing({
 ```
 ### `id`
 **Type:** [String]  
-**Default:**  
-`"0"` *(for the `[0]` motion template in the [`motions`](#motions) collection)*,  
-`"1"` *(for the `[1]` motion template in the[`motions`](#motions) collection)*, etc.
+**Default:** `"0"`, `"1"`, `"2"`, etc. for every next motion template that is added to the [`motions`](#motions-1) collection and that does not have its own `id` defined
+
 * It is the **indentifier** of the [motion template](#motions)
 * The `id` can be used to build the animation [chains](#chaining-methods) of the [motion templates](#motions)
 * The `id` property defined in the [`defaults`](#defaults) object is ignored *(each motion template must have its individual identifier)*
+* The `id` properties are immutable:
+  * the `id` once defined cannot be **updated** by [`motions.add()`](#motions-1) method
+  * when the motion template is removed from the [`motions`](#motions-1) collection with the [`motions.remove()`](#motions-1) method, the **default** `id`s remain immutable as well
 
 ### `mode`
 **Type:** [String|Array]  
-**Default:** `"linear"`
+**Default:** `"linear"` *(unless it is defined in the [defaults](#defaults-1) object)*
 * The `smart-easing` library uses the [De Casteljau's algorithm](https://en.wikipedia.org/wiki/De_Casteljau%27s_algorithm) to draw a Bézier curve of the flow
 * The [String] `mode` should indicate the one of accessible [built-in esing modes]()
   * You can find the list of built-in easing modes in the [simulator]()
+  * The `mode` property is **case insensitive**; *both eg. `'linear'` and `'LiNeAr'` indicates the same mode*
   * See also [`modes`](#modes) getter
 * The [Array] `mode` should contain the values that are interpreted as **custom easing mode**
-  * The [Array] object takes the [Number] value pairs - at least 4 values
+  * The [Array] object takes the [Number] value pairs - at least 4 values and at most 34 values
   * Each pair represents the *x* and *y* coordinate of the point that builds the curve
-  * Each value should be a [Number] value from `0` to `1`
-  * To understand how the Bézier curve is built out of the [Array] values or in order to build your own **custom easing mode** easily, visit the [simulator]() page
+  * The first `{x:0, y:0}` pair is automatically attached
+  * The `x` coordinate must be the [Number] value from `0` to `1` *(the last `x` always must be `1`)*
+  * the `y` coordinate must be the [Number] value from `-1` to `2`
+* To understand how the Bézier curve is built out of the [Array] values or in order to build your own **custom easing mode** easily, visit the [simulator]() page
+  * choose the built-in `mode` from the list and see how the curve is drawn
+  * see how the chosen `mode` behaves on the DOM samples
+  * copy the generated [Array] coordinates and use it in your animation
 * The `mode` property defined in the [`defaults`](#defaults) object applies to all [motion templates](#motions) by default
 
 ### `fps`
 **Type:** [Number]  
-**Default:** `32`
+**Default:** `32` *(unless it is defined in the [defaults](#defaults-1) object)*
 * Set the number of frames rerendered per 1 second
 * Higher `fps` values make the  animation smoother
 * It must be a [Number] integer from `1` to `75`
@@ -195,22 +271,25 @@ const animation = new SmartEasing({
 
 ### `smooth`
 **Type:** [Boolean]  
-**Default:** `false`
+**Default:** `false` *(unless it is defined in the [defaults](#defaults-1) object)*
 * If the [motion template]() is combined with other motion templates in the [chain](#chaining-methods), the whole flow *(switch moment between the motions)* can be not very smooth
-* The `smooth` set to `true` attempts so **smooth** the switch between the motions in the chain
+* The `smooth` set to `true` attempts to **smooth** the switch between the motions in the chain
 * It may slightly alter the default behaviour of the chosen [`mode`](#mode)
 * The `smooth` property defined in the [`defaults`](#defaults) object applies to all [motion templates](#motions) by default
 
 
 ### `start`, `stop`
 **Type:** [Number|Array]  
-**Default `start`:** `0`  
-**Default `stop`:** `1`
+**Default `start`:** `0` *(unless it is defined in the [defaults](#defaults-1) object)*  
+**Default `stop`:** `1` *(unless it is defined in the [defaults](#defaults-1) object)*
 * The motion flow starts from the `start` value and ends with the `stop` value. The recomputed value is accessible in the [`render control event`](#render-1) and as the [`state.coords`](#state) getter
 * Set the custom [Number] values for the `start` and `stop` properties in order to attach the recomputed value directly to some DOM or Canvas element
 * Set the [Array] list of [Number] values in order to compute multiple easing interval values at once
+* The [Array] list must contain at least `1` and at most `16` [Numer] items; *The excess items will be ignored.*
+* The `NaN`, `Infinity` and `-Infinity` is forbidden
+* The incorrect value or incorrect [Array] item will be replaced with the default value
 * The [Array] object of `start` and `stop` must contain the same number of [Number] items
-* Both `start` and `stop` property must be of the same type - either [Number] value or [Array] object
+* Both `start` and `stop` property must be of the same type - either [Number] value or [Array] object; *If both [Array] object and [Number] value is used for `start` and `stop`, the `[0]` item of [Array] object is used only.*
 * If two [motion templates](#motions) are [chained](#chaining-methods), the second motion template in the chain *(if the `start` property is not defined)* **inherits** the `stop` value from the first *(previous)* chained motion template as its `start` value:
   * `animation.chain({ start: 0, stop: 50 }, { stop: 200 }, { stop: 500 }, { start: 45, stop: 220 })`  
     *The second motion starts from `50` and the third motion starts from `200`, but the fourth motion starts from `45`, as it defines its own `start` property.*
@@ -239,7 +318,7 @@ const animation = new SmartEasing({
 
 ### `autostart`
 **Type:** [Boolean]  
-**Default:** `true`
+**Default:** `true` *(unless it is defined in the [defaults](#defaults-1) object)*
 * When the `autostart` is set to `true` for the [motion template](#motions), it runs right after it is called with any [chaining method](#chaining-methods)
 * When the `autostart` is set to `false` for the [motion template](#motions), the animation is automatically paused before the motion start. The [`resume`](#resume) control method must be called manually to run the motion
 * The `autostart` property defined in the [`defaults`](#defaults) object applies to all [motion templates](#motions) by default
@@ -248,7 +327,7 @@ const animation = new SmartEasing({
 
 ### `time`
 **Type:** [Number]  
-**Default:** `1000`
+**Default:** `1000` *(unless it is defined in the [defaults](#defaults-1) object)*
 * Set the duration time of the motion
 * If the motions are [chained](#chaining-methods), the animation time is a sum of all chained motions durations
 * It must be a [Number] positive integer
@@ -259,20 +338,22 @@ const animation = new SmartEasing({
 
 ### `speed`
 **Type:** [Number]  
-**Default:** `undefined`
+**Default:** `undefined` *(unless it is defined in the [defaults](#defaults-1) object)*
 * The [`time`](#time) and `speed` properties are used **alternately**
 * The `speed` property has a priority over the [`time`](#time) property. If the `speed` property is properly defined, the [`time`](#time) property is ignored
 * The [Number] `speed` property indicates what **distance** should be covered **per 1 second**:
   * for `{ start: 0, stop: 100, speed: 10 }` the coords increases by `10` every `1000` milliseconds
   * for `{ start: 0, stop: 100, speed: 25 }` the coords increases by `25` every `1000` milliseconds
-  * for `{ start: 1.1, stop: 1.5, speed: .05 }` the coords increases by `0.05` every `1000` milliseconds
+  * for `{ start: 1.1, stop: 0.5, speed: .05 }` the coords decreases by `0.05` every `1000` milliseconds
+* It must be a [Number] positive value
 * When the `speed` is defined, the final motion duration depends on the **difference** between the [`start`](#start-stop) and [`stop`](#start-stop) values *(the distance)*, while the [`time`]() defined makes the motion duration constant, regardless the distance
+* When the `speed` is set to `Infinity`, the whole distance is covered in 1 millisecond
 * It may turn out more useful than the [`time`](#time) property, if the two [motion templates](#motions) of the different distances are chained and the equal speed of the flow should be kept
 * The `speed` property defined in the [`defaults`](#defaults) object applies to all [motion templates](#motions) by default
 
 ### `delay`
 **Type:** [Number]  
-**Default:** `0`
+**Default:** `0` *(unless it is defined in the [defaults](#defaults-1) object)*
 * Set a duration of the delay that precedes the motion
 * It must be a [Number] positive integer
 * The `1` value equals `1` millisecond, while `1000` equals `1` second, etc.
@@ -282,7 +363,7 @@ const animation = new SmartEasing({
 
 ### `repeat`
 **Type:** [Number]  
-**Default:** `1`
+**Default:** `1` *(unless it is defined in the [defaults](#defaults-1) object)*
 * It indicates how many times the [motion template](#motions) should be repeated
 * It must be a [Number] positive integer or `Infinity`
 * The value lower than `1` will be increased to `1`. The decimal fraction will be rounded to the nearest integer
@@ -418,12 +499,17 @@ animation.last().go(2).go(1).first();
   * `animation.boomerang().repeat(2);`
 
 ## Motion indicators
-* The motion template **indicators** are used in the [`go`](#go) and [`chain`](#chain) chaining methods to **indicate** the the [motion template(s)](#motions) from the [Array] [`motions`](#motions) collection, that should be used in the motion queue
+* The motion template indicators are used to **indicate** the desired [Motion] template stored in the [[Motions]](#motions-1) collection
+* The motion indicator can be used:
+  * in the [`go`](#go) chaining method
+  * in the [`chain`](#chain) chaining method
+  * in the [[Motions].remove](#motions-1) method
 * There are many ways to **indicate** the desired motion template. The motion template indicators can be used alternately in the most suitable way
-* The incorrect motion template **indicator** is ignored *(the next motion in the queue is called)*. The [`beforeEach`](#beforeeach) and [`afterEach`](#aftereach) events are not called for the ignored motion
+* The incorrect motion template **indicator** is ignored *(eg. the next motion in the queue is called)*
+* The [`beforeEach`](#beforeeach) and [`afterEach`](#aftereach) events are not called for the ignored motion
 
 #### 1. Motion template index
-  * The [Number] **index** of the motion template from the [Array] [`motions`](#motions) collection:
+  * The [Number] **index** of the motion template in the [`motions`](#motions-1) collection:
 ```javascript
 animation.go(0).go(1).go(2);
 animation.chain(0, 1, 2);
@@ -462,8 +548,8 @@ animation.chain([animation.motions.first, animation.motions.last]);
 #### 5. Function
   * Pass the function as the argument
   * This function should **return** one of the **motion indicators** described above or the [custom motion template](#custom-motion-templates)
-  * Function allows to put some extra instructions *(eg. check the current state of animation when it's pending)* before the motion indicator is finally returned
-  * The `this` keyword in the function refers to the [Animation] instance with all [getters](#control-getters), [control methods](#control-methods), [chaining methods](#chaining-methods) and [events](#control-events) to control the animation flow
+  * Function allows to put some extra instructions *(eg. check the current state of animation when it's pending)* before the motion indicator is finally returned; *due to the safety reasons, the function cannot be returned as the motion indicator inside the function indicator*
+  * The `this` keyword in the function refers to the [Animation] instance with all [getters](#control-getters), [control methods](#control-methods), [chaining methods](#chaining-methods) and [events](#control-events-1) to control the animation flow
 
 ```javascript
 animation.go(()=> 0);
@@ -494,7 +580,7 @@ animation.chain(()=> {
 * The `id` property is unnecessary in the custom motion template:
   * If the [`id`](#id) property is defined, that indicates the motion template already existing in the [Array] [`motions`](#motions) collection, it is interpreted as the [object with motion template id](#3-object-with-motion-template-id) **identifier**, rather than the custom motion template
   * If the **new** [`id`](#id) property is defined, that does not indicate any motion template in the [Array] [`motions`](#motions) collection, it is interpreted as the **custom motion template**, rather than the [object with motion template id](#3-object-with-motion-template-id) identifier. The `id` is accessible in the [[Motion] instance](#motion-instance) of this **custom** motion template via the [`queue`](#queue) getter while the animation is pending
-* The **custom** motion template is **not stored** in the [Array] [`motions`](#motions) collection and thereby is not accessible via the [`motions`](#motions-1) getter
+* The **custom** motion template is **not stored** in the [`motions`](#motions-1) collection and thereby is not accessible via the [`motions`](#motions-1) getter
 * The **custom** motion template still **inherits** the [motion properties](#motion-properties) from the [`defaults`](#defaults) object
 
 ```javascript
@@ -586,9 +672,9 @@ animation.chain([{ mode: 'ease-in-a', stop: 100, time: 15 }, { mode: 'ease-out-b
 
 # Control the motion flow
 * Use the available **[control methods](#control-methods)** [`pause`](#pause), [`resume`](#resume) and [`reset`](#reset) to control the animation flow
-* Use the available **[control events](#control-events)** [`beforeAll`](#beforeall), [`afterAll`](#afterall), [`beforeEach`](#beforeeach), [`afterEach`](#aftereach), [`afterDelay`](#afterdelay), [`render`](#render-1), [`onPause`](#onpause) and [`onResume`](#onresume) to catch the desirable moment of animation
+* Use the available **[control events](#control-events-1)** [`beforeAll`](#beforeall), [`afterAll`](#afterall), [`beforeEach`](#beforeeach), [`afterEach`](#aftereach), [`afterDelay`](#afterdelay), [`render`](#render-1), [`onPause`](#onpause) and [`onResume`](#onresume) to catch the desirable moment of animation
 * Use the available **[control getters](#control-getters)** [`state`](#state), [`time`](#time-1), [`queue`](#queue), [`modes`](#modes), [`defaults`](#defaults-1) and [`motions`](#motions-1) to get the desired motion's data
-* The animation data differs depending on the moment of the animation when it's pending. You can use the available [control getters](#control-getters) inside the [Function] [control events](#control-events) to get the desired data in the desired moment of animation. You can also use the available [control methods](#control-methods) and [chaining methods](#chaining-methods) inside the [Function] [control events](#control-events) to modify the animation flow.
+* The animation data differs depending on the moment of the animation when it's pending. You can use the available [control getters](#control-getters) inside the [Function] [control events](#control-events-1) to get the desired data in the desired moment of animation. You can also use the available [control methods](#control-methods) and [chaining methods](#chaining-methods) inside the [Function] [control events](#control-events-1) to modify the animation flow.
 
 ## Control methods
 > In order to **start** the animation, call one of the [chaining methods](#chaining-methods) *(or the chain of chaining methods)*.
@@ -629,40 +715,61 @@ animation.afterAll(()=> this.reset().pause());
 ```
 
 ## Control events
+* each **control event** is a `getter`|`setter` property of the [Animation] instance
+* it can be set as the [Function] function in the [constructor](#create-new-animation) or as the [Animation] instance `setter` *(see below)*
+* the `getter` returns `null` if the event has not been defined or  defined with incorrect type
+* the `getter` returns the previously defined function if the event is **redefined** incorrectly
+
+```javascript
+const animation = new SmartEasing({
+  render: function(){/*...*/},
+  beforeAll: function(){/*...*/}
+});
+
+animation.afterAll = function(){/*...*/};
+
+console.log(animation.beforeEach); //null
+console.log(animation.render); //[Function]
+
+```
+
 
 ### `beforeAll`
 * It fires before the whole animation start
 * It fires before the [`beforeEach`](#beforeeach) event of the first motion in the queue
 * It fires before the [`delay`](#delay) *(if defined)* of the first motion in the queue
-* The `this` keyword in the `beforeAll` function refers to the [Animation] instance with all [getters](#control-getters), [control methods](#control-methods), [chaining methods](#chaining-methods) and [events](#control-events) to control the animation flow
+* The `this` keyword in the `beforeAll` function refers to the [Animation] instance with all [getters](#control-getters), [control methods](#control-methods), [chaining methods](#chaining-methods) and [events](#control-events-1) to control the animation flow
 
 ### `afterAll`
 * It fires after the whole animation end
 * It fires after the [`afterEach`](#aftereach) event of the last motion in the queue
-* The `this` keyword in the `afterAll` function refers to the [Animation] instance with all [getters](#control-getters), [control methods](#control-methods), [chaining methods](#chaining-methods) and [events](#control-events) to control the animation flow
+* The `this` keyword in the `afterAll` function refers to the [Animation] instance with all [getters](#control-getters), [control methods](#control-methods), [chaining methods](#chaining-methods) and [events](#control-events-1) to control the animation flow
 
 ### `beforeEach`
 * If fires before each motion start in the queue
 * It fires before the [`delay`](#delay) *(if defined)* of the motion
 * It fires after [`beforeAll`](#beforeall) event for the first motion in the queue
 * It fires after [`afterEach`](#aftereach) event of the previous motion in the queue
-* The `this` keyword in the `beforeEach` function refers to the [Animation] instance with all [getters](#control-getters), [control methods](#control-methods), [chaining methods](#chaining-methods) and [events](#control-events) to control the animation flow
+* The `this` keyword in the `beforeEach` function refers to the [Animation] instance with all [getters](#control-getters), [control methods](#control-methods), [chaining methods](#chaining-methods) and [events](#control-events-1) to control the animation flow
 
 ### `afterEach`
 * If fires after each motion end in the queue
 * It fires before [`afterAll`](#afterall) event for the last motion in the queue
 * It fires before [`beforeEach`](#beforeeach) event of the next motion in the queue
-* The `this` keyword in the `afterEach` function refers to the [Animation] instance with all [getters](#control-getters), [control methods](#control-methods), [chaining methods](#chaining-methods) and [events](#control-events) to control the animation flow
+* The `this` keyword in the `afterEach` function refers to the [Animation] instance with all [getters](#control-getters), [control methods](#control-methods), [chaining methods](#chaining-methods) and [events](#control-events-1) to control the animation flow
 
 ### `afterDelay`
 * It fires after the [`delay`](#delay) interval *(if defined)* for the motion
 * It does not fire if the [`delay`](#delay) equals `0`
-* The `this` keyword in the `afterDelay` function refers to the [Animation] instance with all [getters](#control-getters), [control methods](#control-methods), [chaining methods](#chaining-methods) and [events](#control-events) to control the animation flow
+* The `this` keyword in the `afterDelay` function refers to the [Animation] instance with all [getters](#control-getters), [control methods](#control-methods), [chaining methods](#chaining-methods) and [events](#control-events-1) to control the animation flow
 
 
 ### `render`
-* [See the description above](#render)
-* The [Function] `render` event can be either defined when the new [Animation] instance is created with the constructor or after the new instance is already created
+* It lets to attach the computed easing numerical value to some DOM or Canvas element
+* The [Function] `render` is called for every animation **frame** *(according to the [`fps`](#fps) setting)*, thus it rerenders the chosen element flow
+* The current [Number|Array] **coordinates** *(the value between [`start`]() and [`stop`]())* are passed as the `[0]` argument in the `render` function
+* The `this` keyword in the `render` function refers to the [Animation] instance with all [getters](#control-getters), [control methods](#control-methods), [chaining methods](#chaining-methods) and [events](#control-events-1) to control the animation flow
+
 ```javascript
 const SmartEasing = require('smart-easing');
 const animation = new SmartEasing({
@@ -705,7 +812,7 @@ animation.resume();
 ## Control getters 
 
 ### `state`
-**Return:** `[Object]`
+**Return:** `[State]`
 * It indicates the current state of the animation
 * The following `getter` properties are accessible:
   * `state.coords` [Number|Array]
@@ -743,7 +850,7 @@ else animation.pause();
 ```
 
 ### `time`
-**Return:** `[Object]`
+**Return:** `[Time]`
 * It lets to control the time of both current motion and the animation:
 * The following `getter` properties are accessible:
   * `time.current.elapsed` [Number]
@@ -779,7 +886,7 @@ animation.render(()=> {
 ```
 
 ### `queue`
-**Return:** `[Object]`
+**Return:** `[Queue]`
 * The chain of [chaining methods](#chaining-methods) creates the sequence of the motions
 * The `queue` getter gives the data of this motions sequence
 * The following `getter` properties are accessible:
@@ -814,12 +921,8 @@ animation.beforeEach(()=>{
 });
 ```
 
-
-
-
-
 ### `modes`
-**Return:** `[Object]`
+**Return:** `[Modes]`
 * It returns the [Object] collection of all built-in **easing-modes**
 * The properties correspond with the modes' [String] [names](#mode) and the values correspond with the modes' [Array] [coordinates](#mode)
 * Both modes' **names** and **coordinates** can be used to define the [`mode`]() property of the new **motion template**
@@ -833,47 +936,60 @@ animation.modes; //[Object]
 ```
 
 ### `defaults`
-**Return:** `[Object]`
-* It returns the [`defaults`](#defaults) object
-* Each [`defaults`](#defaults) property can be (re)defined here
+**Return:** `[Defaults]`
+
+* If some of the [motion properties](#motion-properties) are common for all *(or the majority of)* motion templates, you don't have to define all motion properties for each motion template separately. You can define the default motion properties in the `defaults` object, that will be used for all motion templates by default.
+* The motion properties defined in the `defaults` object will be used by all motion templates in case they don't define the ones themselves
+* The motion properties defined in the motion templates have **priority** over the ones defined in the `defaults` property
+* The motion properties' default values can be also set initially in the [constructor](#defaults)
+* Each [Defaults] motion property has its `getter` and `setter`, thus can be redefined here:
   * `animation.defaults.fps = 44;`
   * `animation.defaults.mode = 'sharp-swing-out-c';`
-* When any property is defined *(for the first time)* incorrectly, the default value is used instead
-* When any property is **re**defined incorrectly, the previous-defined value remains in use
+  * when any property is set incorrectly, the previous-defined value remains in use
+
+
 ### `motions`
-**Return:** `[Object]`
-* It returns the collection of [Motion] **motion templates**' instances defined in the [Array] [`motions`](#motions)
+**Return:** `[Motions]`
+* It returns the collection of [Motion] **motion templates**' instances defined in the [Array] [`motions`](#motions) and added later with `motions.add` method
 * The following **methods** are accessible:
-  * `motions.add(Object)`
-    * It takes the one [Object] `[0]` argument with the [motion properties](#motion-properties) of the **new** motion template
-    * The new **motion template** is added as the last one in the [Array] [`motions`](#motions) collection
-    * The motion template that already exists in the [`motions`](#motions) collection is overwritten by the new motion template, if the new motion template has the same [`id`](#id) property
-  * `motions.get(String|Number)`
-    * It takes the one [String|Number] `[0]` argument that indicates the **seeking** motion template
-    * The [Number] argument should indicate the [index](#1-motion-template-index) of the motion template in the [Array] [`motions`](#motions) collection
-    * The [String] argument should indicate the [`id`](#2-motion-template-identifier) of the seeking motion template
-    * It returns `null` if the [Array] [`motions`](#motions) collection does not contain the seeking motion template
-    * It returns the [Motion] instance of the seeking motion template
-  * `motions.has(String|Number)`
-    * It takes the one [String|Number] `[0]` argument that indicates the **seeking** motion template
-    * The [Number] argument should indicate the [index](#1-motion-template-index) of the motion template in the [Array] [`motions`](#motions) collection
-    * The [String] argument should indicate the [`id`](#2-motion-template-identifier) of the seeking motion template
-    * It returns [Boolean] `true` if the [Array] [`motions`](#motions) collection contains the seeking motion template, otherwise it returns `false`
+  * `motions.add(Object|String|Motion)`
+    * It add the new motion template to the [Motions] collection
+    * The new motion template is added as the last item in the collection
+    * It takes `[Object]` `[0]` argument with a set of [motion properties](#motion-properties) of the new motion template. 
+      * If a motion property is defined incorrectly, the [`defaults`](#defaults) value is used instead.
+      * If the [Motions] collection contains the [Motion] template that has the same [`id`](#id) as defined in the passed [Object] argument, the new [Motion] is not added. The already existing [Motion] template is **updated** instead, with all motion properties defined in the passed [Object] argument.
+    * It takes `[String]` `[0]` argument that indicates the [`id`](#id) motion property
+      * The [`defaults`](#defaults) values are used for the rest of motion properties for this motion.
+    * It takes `[Motion]` `[0]` argument instance that is simply added to the `motions` collection
+      * It can be a [Motion] instance taken from another animation, the [custom motion](#custom-motion-templates) or the [Motion] instance previously removed from the `motions` collection.
+      * If the [Motions] collection contains the [Motion] template of the same [`id`](#id) as defined in the passed [Motion] argument, this motion is not added to the [Motions] collection. The already existing [Motion] template is **updated** instead, with all motion properties defined in the passed [Motion] argument.
+    * If the argument of incorrect type has been passed, the motion is created anyway with the [`defaults`](#defaults) values and the default [`id`](#id)
+  * `motions.remove(Indicator)`
+    * It removes the [Motion] template from the `motions` collection
+    * It takes one `[0]` [`motion indicator`](#motion-indicators) argument that indicates the desired motion
+    * Mind, that if the motion is removed when the animation is pending, the chaining methods that indicate this motion are omitted
+  * `motions.get(Indicator)`
+    * It takes one `[0]` [`motion indicator`](#motion-indicators) argument that indicates the **seeking** motion template
+    * It returns the [[Motion] instance](#motion-instance) of the seeking motion template
+    * It returns `null` if the `motions` collection does not contain the seeking motion template
+  * `motions.has(Indicator)`
+    * It takes one `[0]` [`motion indicator`](#motion-indicators) argument that indicates the **seeking** motion template
+    * It returns [Boolean] `true` if the [`motions`](#motions-1) collection contains the seeking motion template, otherwise it returns `false`
 * The following `getter` properties are accessible:
   * `list` [Array]
-    * It returns the [Array] list of the [String] [`id`](#id)s of all **motion templates** in the [`motions`](#motions) collection
+    * It returns the [Array] list of the [String] [`id`](#id)s of all **motion templates** in the `motions` collection
     * The motion templates order is retained
   * `reversed`
-    * It returns the [Array] list of the [String] [`id`](#id)s of all **motion templates** in the [`motions`](#motions) collection
+    * It returns the [Array] list of the [String] [`id`](#id)s of all **motion templates** in the `motions` collection
     * The motion templates order is **reversed**
   * `first` [Motion|null]
-    * It returns the first [[Motion] instance](#motion-instance) of the [Array] [`motions`](#motions) collection
-    * It returns `null` if the [`motions`](#motions) collection is empty
+    * It returns the first [[Motion] instance](#motion-instance) of the `motions` collection
+    * It returns `null` if the `motions` collection is empty
   * `last` [Motion|null]
-    * It returns the last [[Motion] instance](#motion-instance) of the [Array] [`motions`](#motions) collection
-    * It returns `null` if the [`motions`](#motions) collection is empty
+    * It returns the last [[Motion] instance](#motion-instance) of the `motions` collection
+    * It returns `null` if the `motions` collection is empty
   * `length` [Number]
-    * It returns the [Number] number of all motion templates in the [Array] [`motions`](#motions) collection
+    * It returns the [Number] number of all motion templates in the `motions` collection
 
 # [Motion] instance
 * The [Motion] instance is created for:
@@ -881,8 +997,8 @@ animation.modes; //[Object]
   * each **[custom motion](#custom-motion-templates)** passed as the argument in the [`go`](#go) or [`chain`](#chain) chaining method
 * The [Motion] `getter` properties:
   * `index` [Number]
-    * It returns the motion template's **index** in the [Array] [`motions`](#motions) collection
-    * It returns `null` for the [custom motion templates](#custom-motion-templates)
+    * It returns the motion template's **index** in the [`motions`](#motions-1) collection
+    * It returns `null` for the [Motion] instance that is not stored in the [Motions] collection
   * `id` [String]
     * It returns the [`id`](#id) of the motion template
     * if the [custom motion](#custom-motion-templates) is created without the [`id`](#id) defined, it returns `null`

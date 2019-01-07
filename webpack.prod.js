@@ -4,6 +4,7 @@ const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const frontEnd = require('./webpack.frontend.js');
 const backEnd = require('./webpack.backend.js');
 const simulator = require('./webpack.simulator.js');
+const docs = require('./webpack.docs.js');
 
 const prod = {
   mode: 'production',
@@ -29,5 +30,6 @@ const prod = {
 module.exports = [
   merge(common, prod, backEnd),
   merge(common, prod, frontEnd),
-  merge(common, prod, simulator)
+  merge(common, prod, simulator),
+  merge(common, prod, docs)
 ];

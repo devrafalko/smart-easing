@@ -5,3 +5,6 @@ node_modules
 debug-init.js
 .babelrc
 .eslintrc.json
+debug-init.js
+testing.js
+todo.txt

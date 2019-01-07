@@ -3,6 +3,8 @@ const common = require('./webpack.common.js');
 const frontEnd = require('./webpack.frontend.js');
 const backEnd = require('./webpack.backend.js');
 const simulator = require('./webpack.simulator.js');
+const docs = require('./webpack.docs.js');
+
 
 const dev = {
   mode: 'development',
@@ -34,5 +36,6 @@ const dev = {
 module.exports = [
   merge(common, dev, backEnd),
   merge(common, dev, frontEnd),
-  merge(common, dev, simulator)
+  merge(common, dev, simulator),
+  merge(common, dev, docs)
 ];
