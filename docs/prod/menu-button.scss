@@ -1,0 +1,55 @@
+/* 
+Released under the MIT license.
+Copyright (c) 2019 Pawel Rafalko dev.rafalko@gmail.com
+https://github.com/devrafalko/SASS-Templates
+*/
+
+@mixin menu-button($dots: 3, $time: .15s, $delay: .15s, $width: 16px, $height: 60px, $diameter: 16px, $color: white, $hover-diameter: $diameter * 1.15, $hover-color: $color) {
+  $bezier: cubic-bezier(0.240, 2, 0.440, 0.990);
+  cursor: pointer;
+  height: $height;
+  pointer-events: auto;
+  width: $width;
+  &.hidden {
+    pointer-events: none;
+  }
+
+  &.hidden>*>* {
+    height: 0px;
+    width: 0px;
+  }
+
+  &:hover>*>* {
+    background-color: $hover-color;
+    height: $hover-diameter;
+    width: $hover-diameter;
+  }
+
+  &>* {
+    height: 33.3%;
+    position: relative;
+    width: 100%;
+    &>* {
+      background-color: $color;
+      border-radius: 50%;
+      bottom: -100%;
+      display: block;
+      height: $diameter;
+      left: -100%;
+      margin: auto;
+      position: absolute;
+      right: -100%;
+      top: -100%;
+      width: $diameter;
+    }
+    @for $dot from 1 through $dots {
+      $break: $dot - 1;
+      &:nth-child(#{$dot})>* {
+        transition:
+          width $time $delay * $break $bezier, 
+          height $time $delay * $break $bezier, 
+          background-color $time $delay * $break ease-in-out;
+      }
+    }
+  }
+}

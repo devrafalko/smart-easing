@@ -1,0 +1,606 @@
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:300, 400, 500, 600,700');
+@import url('https://fonts.googleapis.com/css?family=PT+Sans');
+@import url('https://fonts.googleapis.com/css?family=Cairo');
+@import url('https://fonts.googleapis.com/css?family=Inconsolata');
+@import url('https://fonts.googleapis.com/css?family=Cutive+Mono');
+@import url('https://fonts.googleapis.com/css?family=Maven+Pro');
+
+@import 'responsive-media-style-creator';
+@import 'menu-button';
+
+$font-monospace-a: 'Inconsolata', monospace;
+$font-monospace-b: 'Cutive Mono', monospace;
+$font-sans-a: 'Open Sans', sans-serif;
+$font-sans-b: 'PT Sans', sans-serif;
+$font-sans-c: 'Cairo', sans-serif;
+$font-sans-d: 'Maven Pro', sans-serif;
+
+$color-turquoise-a: #04aaac;
+$color-turquoise-b: #4ad486;
+$color-turquoise-c: #00bd84;
+$color-sea-a: #074053;
+$color-sea-b: #7bb6e7;
+$color-sea-c: #2C8DA4;
+$color-grey-a: #7d7d7d;
+$color-grey-b: #474747;
+$color-grey-c: #f8f8f8;
+$color-grey-d: #e7e7e7;
+$color-pink-a: #ff55aa;
+$color-pink-b: #f7415f;
+$color-blue-a: #039be5;
+$color-blue-b: #0078ce;
+
+* {
+  box-sizing: border-box;
+  font-size: 15px;
+  margin: 0px;
+  padding: 0px;
+}
+
+body {
+  height: 100vh;
+  width: 100%;
+}
+
+body {
+  &::-webkit-scrollbar {
+    background-color: transparent;
+    height: 14px;
+    width: 14px;
+  }
+  &::-webkit-scrollbar-corner{
+    background-color: transparent;
+  }
+  &::-webkit-scrollbar-thumb{
+    background: linear-gradient(to bottom, rgba($color-turquoise-a, .5), rgba($color-turquoise-a, 1));
+    border-radius: 2px;
+    box-shadow: 0px 0px 8px 3px rgba($color-turquoise-a, .5) inset;
+    &:hover{
+      box-shadow: 0px 0px 8px 6px rgba($color-turquoise-a, .8) inset;
+    }
+  }
+}
+
+menu {
+  &::-webkit-scrollbar {
+    background-color: transparent;
+    height: 10px;
+    width: 10px;
+  }
+  &::-webkit-scrollbar-corner{
+    background-color: transparent;
+  }
+  &::-webkit-scrollbar-thumb{
+    background: linear-gradient(to bottom, rgba($color-turquoise-c, .3), rgba($color-turquoise-c, 1));
+    border-radius: 5px;
+    box-shadow: 0px 0px 3px 1px rgba(white, .5) inset;
+    &:hover{
+      box-shadow: 0px 0px 6px 1px rgba(white, .8) inset;
+    }
+  }
+}
+
+menu>div {
+  float: right;
+  position: relative;
+  right: 0px;
+  top: 0px;
+  width: 100%;
+  @include media(small, andsmaller){
+    padding-left: 10px;
+    width: 200px;
+  };
+}
+
+menu.close {
+  @include media(small, andsmaller){
+    left: -24px;
+    width: 0px;
+  };
+}
+
+menu {
+  @include media(small, andsmaller){
+    transition: width .3s cubic-bezier(0.230, 1.000, 0.320, 1.000), left .3s ease-in-out;
+    left: 0px;
+    width: 200px;
+  };
+
+  @include media(medium, andlarger){
+    padding-left: 3px;
+    padding-top: 12px;
+    width: 200px;
+  };
+
+  @include media(large, andlarger){
+    padding-left: 6px;
+    padding-top: 22px;
+    width: 240px;
+  }
+
+  background-image: 
+    linear-gradient(to left, rgba($color-turquoise-a, 0.8), rgba($color-turquoise-a, 0)),
+    linear-gradient(to top, $color-sea-a , $color-sea-b);
+  box-shadow: 4px 0px 10px rgba($color-grey-a, 0.7);
+  color: white;
+  display: block;
+  font-family: $font-sans-d;
+  height: 100%;
+  left: 0px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  position: fixed;
+  z-index: 1;
+}
+
+menu li{
+  cursor: pointer;
+  margin-left: 8px;
+}
+
+menu .collapsible a {
+  @include media(small, andsmaller){ font-size: 14px };
+  @include media(medium, andlarger){ font-size: 15px };
+  color: white;
+  display: inline-block;
+  line-height: 1.2;
+  position: relative;
+  transition: 
+    border-left-width .25s ease-in-out,
+    padding-left .25s ease-in-out;
+  &::after {
+    background-color: $color-turquoise-b;
+    bottom: 0px;
+    content: '';
+    display: block;
+    height: 100%;
+    margin-left: -6px;
+    position: absolute;
+    transition: width .15s ease-in-out;
+    width: 0px;
+  }
+  &.active-spy::after { width: 4px }
+  &:hover:not(.active):not(.active-spy)::after { width: 2px }
+}
+
+#menu-open-button {
+  position: fixed;
+  right: 6px;
+  top: 6px;
+  z-index: 1000;
+  @include media(small, andsmaller){ display: block };
+  @include media(medium, andlarger){ display: none };
+  @include menu-button(
+    $time: .15s,
+    $delay: .08s,
+    $width: 14px,
+    $height: 60px,
+    $diameter: 12px,
+    $hover-diameter: 18px,
+    $color: rgba($color-turquoise-a, .8),
+    $hover-color: rgba($color-turquoise-a, 1)
+  );
+}
+
+#menu-close-button {
+  position: absolute;
+  right: 2px;
+  top: 2px;
+  @include media(small, andsmaller){ display: block };
+  @include media(medium, andlarger){ display: none };
+  @include menu-button(
+    $time: .1s,
+    $delay: .08s,
+    $width: 13px,
+    $height: 52px,
+    $diameter: 8px,
+    $hover-diameter: 13px,
+    $color: rgba(white, .4),
+    $hover-color: rgba(white, .8)
+  );
+}
+
+.collapsible, .collapsible-header, .table-header, .collapsible-body {
+  background-color: transparent;
+  border: 0px;
+  box-shadow: initial;
+  margin-top: 0;
+  margin-bottom: 0;
+  padding: 0px;
+}
+
+main {
+  @include media(small, andsmaller){ margin-left: 0px };
+  @include media(medium, andlarger){ margin-left: 200px };
+  @include media(large){ margin-left: 252px };
+  @include media(xlarge, andlarger){ margin-left: 300px };
+  display: block;
+  max-width: 840px;
+  min-width: 380px;
+  padding: 12px;
+}
+
+.paragraph {
+  font-family: $font-sans-a;
+  line-height: 1.8;
+  margin: 12px 6px;
+  margin-right: 0px;
+  text-align: justify;
+}
+
+main p, main dt, main dd {
+  @extend .paragraph;
+}
+
+main header{
+  text-align: center;
+}
+
+main dt {
+  margin-bottom: 2px;
+}
+
+main dd{
+  margin: 0px 22px;
+  margin-right: 6px;
+}
+
+main a {
+  border-bottom: dotted 1px $color-blue-a !important;
+  display: inline-block;
+  line-height: 20px;
+  padding-bottom: 0px;
+  text-decoration: none;
+  transition: color .2s ease-in-out, border-color .2s ease-in-out;
+  white-space: nowrap;
+  &:hover {
+    color: $color-pink-a;
+    border-color: rgba($color-pink-a, 1) !important;
+  }
+}
+
+h1, h2, h3, h4, h5, h6 {
+  display: block;
+  font-family: $font-sans-b;
+  padding: 2px;
+  white-space: nowrap;
+  width: 0px;
+  &[data-id]{
+    cursor: pointer;
+  }
+  &[data-id]:hover::before {
+    color: $color-turquoise-a;
+    font-family: 'Material Icons';
+    content: 'link';
+    line-height: 0;
+    vertical-align:middle;
+  }
+}
+
+h1 {
+  color: $color-grey-b;
+  font-size: 36px;
+  &::after {
+    background: linear-gradient(to right, $color-turquoise-a, rgba($color-turquoise-a, 0));
+    content: '';
+    cursor: default;
+    display: block;
+    height: 1px;
+    max-width: 780px;
+    width: 50vw;
+  }
+}
+
+h2 {
+  color: $color-grey-b;
+  font-size: 22px;
+}
+
+h3 {
+  color: $color-grey-b;
+  font-size: 19px;
+  font-weight: bold;
+}
+
+h4 {
+  color: $color-grey-a;
+  font-size: 18px;
+}
+
+.lang-name {
+  color: $color-grey-a;
+  letter-spacing: 2px;
+  white-space: nowrap;
+}
+
+.prop-name {
+  border: dotted 1px rgba($color-blue-a, 0.15);
+  border-radius: 4px;
+  color: $color-blue-a;
+  display: inline-block;
+  font-family: $font-monospace-a;
+  letter-spacing: 1px;
+  line-height: 20px;
+  padding: 0px 3px;
+  padding-bottom: 2px;
+  white-space: nowrap;
+}
+
+.inline-expl {
+  color: $color-grey-b;
+  font-style: italic;
+  font-size: 13px;
+  letter-spacing: 1px;
+}
+
+.instance {
+  background-color: $color-grey-c;
+  color: $color-grey-b;
+  font-family: $font-monospace-b;
+  font-size: 16px;
+  padding: 1px 0px;
+}
+
+.input-value {
+  background-color: $color-grey-c;
+  border-radius: 2px;
+  color: $color-pink-b;
+  display: inline-block;
+  font-family: $font-monospace-a;
+  font-size: 17px;
+  line-height: 17px;
+  padding: 2px 0px;
+}
+
+.emphasis-word {
+  color: $color-pink-b;
+  display: inline-block;
+  font-weight: normal;
+  letter-spacing: 2px;
+  padding: 0px 4px;
+}
+
+strong {
+  @extend .emphasis-word;
+}
+
+.text-sample {
+  background-color: $color-grey-c;
+  border-left: solid 4px rgb(190,190,190);
+  color: $color-grey-b;
+  font-style: italic;
+  padding: 2px 10px;
+}
+
+.keyword-name {
+  color: $color-blue-b;
+  font-family: $font-monospace-a;
+  font-size: 16px;
+  letter-spacing: 1px;
+}
+
+.file-path {
+  background-color: $color-grey-d;
+  border-radius: 3px;
+  display: inline-block;
+  font-family: $font-monospace-a;
+  letter-spacing: 2px;
+  line-height: 1.2;
+  padding: 0px 6px;
+  white-space: nowrap;
+}
+
+.mind {
+  @extend .paragraph;
+  background-color: rgb(248,248,248);
+  border-left: solid 4px $color-turquoise-c;
+  color: rgb(65, 65, 65);
+  padding: 10px 20px;
+  position: relative;
+  &::before {
+    background-image: url('./assets/lightbulb-off.png');
+    @extend .bulb;
+  }
+  &:hover::before {
+    background-image: url('./assets/lightbulb-on.png');
+    @extend .bulb;
+  }
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+.bulb {
+  background-color: $color-turquoise-c;
+  background-origin: content-box;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  border-radius: 50%;
+  bottom: 0;
+  color: white;
+  content: '';
+  display: block;
+  font-size: 20px;
+  height: 24px;
+  left: -14px;
+  line-height: 1.2;
+  margin: auto;
+  padding: 1px;
+  position: absolute;
+  text-align: center;
+  top: 0;
+  width: 24px;
+}
+
+.samples-list>li {
+  font-family: $font-sans-a;
+  list-style-type: circle !important;
+  list-style-position: outside;
+  line-height: 1.8;
+  margin-left: 26px;
+}
+
+.docs-list{
+  @extend .paragraph;
+}
+
+.docs-list>li {
+  font-family: $font-sans-a;
+  list-style-type: circle !important;
+  list-style-position: outside;
+  line-height: 1.8;
+  margin-left: 26px;
+}
+
+.docs-list>li>ul:not(.collapsible-code)>li {
+  list-style-type: square;
+  margin-left: 22px;
+}
+
+.arguments-list {
+  &>li {
+    list-style-type: none !important;
+    margin-left: 0px !important;
+  }
+  & ul {
+    margin-left: 20px;
+  }
+  & ul>li {
+    list-style-type: square !important;
+
+  }
+}
+
+.collapsible-code {
+  margin: 6px;
+  margin-right: 0px;
+  & .collapsible-header {
+    background-image: linear-gradient(to right, $color-sea-c, $color-turquoise-a);
+    color: white;
+    display: block;
+    &>* {
+      line-height: 1.5;
+      vertical-align: top;
+    }
+  }
+  & pre {
+    margin: 0;
+  }
+}
+
+.collapsible-switch {
+  display: inline-block;
+  height: 22px;
+  overflow: hidden;
+  padding: 0px;
+  position: relative;
+  white-space: nowrap;
+  width: 22px;
+  &>span {
+    display: inline-block;
+    position: absolute;
+    transition: left .15s ease-in-out;
+    width: 44px;
+  }
+  &.opened>span {
+    left: 0%;
+  }
+  &.closed>span {
+    left: -100%;
+  }
+  &>span>i {
+    display: block;
+    float: left;
+    font-size: 20px;
+    margin: 0px;
+    width: 22px;
+  }
+}
+
+.collapsible-title {
+  display: inline-block;
+  font-family: $font-sans-c;
+  font-size: 14px;
+  line-height: 18px;
+}
+
+.collapsible-language {
+  display: block;
+  float: right;
+  margin-right: 12px;
+}
+
+.collapsible-table {
+  border: solid 1px $color-grey-d;
+  border-bottom-width: 0px;
+}
+
+.collapsible-table .collapsible-body {
+  padding: 6px;
+}
+
+.collapsible-code .collapsible-body {
+  padding: 0px;
+}
+
+.collapsible-table {
+  & .table-header, & .collapsible-body {
+    border-bottom:solid 1px $color-grey-d;
+  }
+  & .simple-code {
+    margin: 0;
+    margin-top: 12px;
+  }
+  & .table-header a {
+    border-bottom-color: $color-grey-a !important;
+    color: $color-grey-a;
+    transition: color .2s ease-in-out, border-color .2s ease-in-out;
+    &:hover {
+      border-color: rgba($color-pink-a, 1) !important;
+      color: $color-pink-a;
+    }
+  }
+}
+
+.table-header {
+  & * {
+    font-size: 18px;
+  }
+  &>* {
+    margin: 6px 3px;
+  }
+}
+
+.parameters-table {
+  table-layout: fixed;
+  td {
+    padding: 6px 12px;
+    vertical-align: top;
+  }
+  td:first-child {
+    font-family: $font-sans-c;
+    font-weight: bold;
+    width: 80px;
+  }
+}
+
+.plain-table {
+  padding: 30px;
+  table-layout: auto;
+  
+  td:first-child {
+    font-family: $font-sans-c;
+    font-weight: normal;
+    width: auto;
+  }
+}
+
+.instance-list>li {
+  list-style-type: upper-alpha !important;
+  &>ul:not(.collapsible-code)>li {
+    margin-left: 12px;
+    list-style-type: square !important;
+  }
+}

@@ -9,9 +9,7 @@ module.exports = {
     filename: 'smart-easing.node.js',
     path: path.resolve(__dirname, 'dist'),
     library:'SmartEasing',
-    libraryTarget: 'commonjs2',
-    libraryExport:'default',
-    globalObject: 'this'
+    libraryTarget: 'commonjs2'
   },
   target:'node',
   externals: [nodeExternals()]
